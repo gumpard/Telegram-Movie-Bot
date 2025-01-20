@@ -7,48 +7,63 @@
   Add your open source license, GitHub uses MIT license.
 -->
 
-# GitHub Pages
+# Telegram Movie-Bot
 
-_Create a site or blog from your GitHub repositories with GitHub Pages._
+_Ein Telegram Bot, welcher das Entdecken von neuen Filmen oder Serien vereinfachen soll._
 
 </header>
 
+## Materialien
+Dieses Projekt ist mit einem Rapberry-PI 3 erstellt, funktioniert aber auf jedem Python-lauffähigen Gerät (hier Python3). Als Datenbank für die Filme und Serien wird die eine API zur TMDB (The Movie Database) verwendent.
+
+## Schritt 1: Libraries installieren
+Für die Schnittstelle zu Telegramm wird zunächst die Library telebot verwendet.
+```
+pip install telebot
+```
+Außerdem wird die [tmdbsimple](https://github.com/celiao/tmdbsimple) Library verwendet, um das Abfragen der Datenbank einfacher zu gestalten.
+```
+pip install tmdbsimple
+```
+Diese Library beruht auf [requests](https://requests.readthedocs.io/en/latest/) und wird dabei mit installiert.
 <!--
-  <<< Author notes: Step 1 >>>
-  Choose 3-5 steps for your course.
-  The first step is always the hardest, so pick something easy!
-  Link to docs.github.com for further explanations.
-  Encourage users to open new tabs for steps!
+PIL?
+io?
+random?
 -->
 
-## Step 1: Enable GitHub Pages
+## Schritt 2: Telegram Bot einrichten
+Um eine Telegram Bot zu erstellen ist es am Einfachsten, dieser [Anleitung](https://core.telegram.org/bots/tutorial#obtain-your-bot-token) zu folgen.
 
-_Welcome to GitHub Pages and Jekyll :tada:!_
+In kurzform sind es folgende Schritte:
++ bei Telegram @BotFather eine Nachricht mit "/newbot" schreiben
++ den Anweisungen folgen
++ den erhaltenen Token kopieren, dieser wird in Schritt 4 benötigt
 
-The first step is to enable GitHub Pages on this [repository](https://docs.github.com/en/get-started/quickstart/github-glossary#repository). When you enable GitHub Pages on a repository, GitHub takes the content that's on the main branch and publishes a website based on its contents.
+> [!TIP]
+> Der Token sollte folgendes Format haben: _4839574812:AAFD39kkdpWt3ywyRZergyOLMaJhac60qc_
 
-### :keyboard: Activity: Enable GitHub Pages
+> [!NOTE]
+> Der Name des Bots kann nicht verändert werden, dafür muss ein neuer Bot (mit neuem Token) angelegt werden.
 
-1. Open a new browser tab, and work on the steps in your second tab while you read the instructions in this tab.
-1. Under your repository name, click **Settings**.
-1. Click **Pages** in the **Code and automation** section.
-1. Ensure "Deploy from a branch" is selected from the **Source** drop-down menu, and then select `main` from the **Branch** drop-down menu.
-1. Click the **Save** button.
-1. Wait about _one minute_ then refresh this page (the one you're following instructions from). [GitHub Actions](https://docs.github.com/en/actions) will automatically update to the next step.
-   > Turning on GitHub Pages creates a deployment of your repository. GitHub Actions may take up to a minute to respond while waiting for the deployment. Future steps will be about 20 seconds; this step is slower.
-   > **Note**: In the **Pages** of **Settings**, the **Visit site** button will appear at the top. Click the button to see your GitHub Pages site.
+## Schritt 3: API-Token von TMDB erhalten
+Um einen eigenen API-Token von TMDB zu erhalten, muss dort zunächst ein [Account](https://www.themoviedb.org/signup) erstellt werden. 
+Mit Login kann dann ein [API-Token](https://www.themoviedb.org/settings/api) angefragt werden. Diese Maske muss nun ausgefüllt werden, um den Token zu erhalten. Auch dieser Token wird in Schritt 4 benötigt.
+
+> [!TIP]
+> Bei der **Anwendungs-URL** kann ***not available*** eingetragen werden.
+
+## Schritt 4: Programm mit API- und Bot-Token ausführen
+Die Tokens aus Schritt 2 und 3 müssen noch in den Code eingefügt werden. Nun kann das Programm ausgeführt und getestet werden.
+
+Für den einfacheren Umgang kann das Programm auch als Service ausgeführt werden, dies wird in Schritt 5 erklärt.
+
+## Schritt 5 _(Optional)_: 
+
+--> Service
 
 <footer>
 
-<!--
-  <<< Author notes: Footer >>>
-  Add a link to get support, GitHub status page, code of conduct, license link.
--->
-
----
-
-Get help: [Post in our discussion board](https://github.com/orgs/skills/discussions/categories/github-pages) &bull; [Review the GitHub status page](https://www.githubstatus.com/)
-
-&copy; 2023 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
+_Ein Projekt für die HAW-Hamburg im Kurs Paspberry-PI bei Dr. Claudius Noack_
 
 </footer>
