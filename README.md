@@ -58,6 +58,9 @@ Die Tokens aus Schritt 2 und 3 müssen noch in den Code eingefügt werden. Nun k
 
 Für den einfacheren Umgang kann das Programm auch als Service ausgeführt werden, dies wird in Schritt 5 erklärt.
 
+> [!TIP]
+> Für den [TMDB-Token](https://www.themoviedb.org/settings/api) ist der **API-Schlüssel** zu verwenden, dieser ist der kurzere.
+
 ## Schritt 5 _(Optional)_: 
 
 --> Service
