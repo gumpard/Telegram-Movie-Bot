@@ -9,7 +9,7 @@
 
 # Telegram Movie-Bot
 
-_Ein Telegram Bot, welcher das Entdecken von neuen Filmen oder Serien vereinfachen soll._
+_Ein Telegram Bot, welcher das Entdecken von neuen Filmen oder Serien vereinfachen soll. Außerdem werden die Bewertungen verschiedener Datenbanken zusammengeführt._
 
 </header>
 
