@@ -31,6 +31,7 @@ PIL?
 io?
 random?
 -->
+Andere Librarys --> Tammo?
 
 ## Schritt 2: Telegram Bot einrichten
 Um eine Telegram Bot zu erstellen ist es am Einfachsten, dieser [Anleitung](https://core.telegram.org/bots/tutorial#obtain-your-bot-token) zu folgen.
@@ -42,9 +43,6 @@ In kurzform sind es folgende Schritte:
 
 > [!TIP]
 > Der Token sollte folgendes Format haben: _4839574812:AAFD39kkdpWt3ywyRZergyOLMaJhac60qc_
-
-> [!NOTE]
-> Der Name des Bots kann nicht verändert werden, dafür muss ein neuer Bot (mit neuem Token) angelegt werden.
 
 ## Schritt 3: API-Token von TMDB erhalten
 Um einen eigenen API-Token von TMDB zu erhalten, muss dort zunächst ein [Account](https://www.themoviedb.org/signup) erstellt werden. 
