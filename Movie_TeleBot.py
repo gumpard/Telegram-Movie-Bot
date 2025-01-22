@@ -98,7 +98,7 @@ for index, genre in enumerate(genres_series):
 
 #create Keyboard for movie and Sereis
 reply_keyboard_func = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-reply_keyboard_func.add("Empfelung","Suche")
+reply_keyboard_func.add("Empfehlung","Suche")
 
 #create Keyboard for movie and Sereis
 reply_keyboard_type = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
@@ -119,33 +119,36 @@ inline_keyboard_delete.add(button_delete)
 #massage handler for the startup
 @bot.message_handler(commands=['start'])
 def process_func(message):
-    bot.send_message(message.chat.id, "Empfelung oder Suche", reply_markup = reply_keyboard_func)
+    bot.send_message(message.chat.id, "Empfehlung oder Suche", reply_markup = reply_keyboard_func)
     bot.register_next_step_handler(message, process_type)
 
 def process_type(message):
     global func
     func = message.text
-    if func != "Empfelung" and func != "Suche":
-        process_func(message)
-    bot.send_message(message.chat.id, "Film oder Serie?", reply_markup = reply_keyboard_type)
-    bot.register_next_step_handler(message, process_genre)
+    if func != "Empfehlung" and func != "Suche":
+        bot.send_message(message.chat.id, "Empfehlung oder Suche", reply_markup = reply_keyboard_func)
+        bot.register_next_step_handler(message, process_type)
+    else:
+        bot.send_message(message.chat.id, "Film oder Serie?", reply_markup = reply_keyboard_type)
+        bot.register_next_step_handler(message, process_genre)
     
 #massage handler for genres
 def process_genre(message):
     global searchType
     searchType = message.text
     if searchType != "Film" and searchType != "Serie":
-        process_type(message)
-    
-    if func == "Empfelung":
-        if searchType == "Film":
-            bot.send_message(message.chat.id, "Genre auswählen:", reply_markup = reply_keyboard_genres_movie)
-        if searchType == "Serie":
-            bot.send_message(message.chat.id, "Genre auswählen:", reply_markup = reply_keyboard_genres_series)
-        bot.register_next_step_handler(message, process_searchType)
-    elif func == "Suche":
-        bot.send_message(message.chat.id, "Geben Sie ein Suchbegriff ein.", reply_markup = reply_keyboard_Remove)
-        bot.register_next_step_handler(message, process_Suche)
+        bot.send_message(message.chat.id, "Film oder Serie?", reply_markup = reply_keyboard_type)
+        bot.register_next_step_handler(message, process_genre)
+    else:
+        if func == "Empfehlung":
+            if searchType == "Film":
+                bot.send_message(message.chat.id, "Genre auswählen:", reply_markup = reply_keyboard_genres_movie)
+            if searchType == "Serie":
+                bot.send_message(message.chat.id, "Genre auswählen:", reply_markup = reply_keyboard_genres_series)
+            bot.register_next_step_handler(message, process_searchType)
+        elif func == "Suche":
+            bot.send_message(message.chat.id, "Geben Sie ein Suchbegriff ein.", reply_markup = reply_keyboard_Remove)
+            bot.register_next_step_handler(message, process_Suche)
 
 def process_Suche(message):
     global searchType
@@ -181,8 +184,9 @@ def process_searchType(message):
                 genre_good = True
     if not genre_good:
         process_searchType(message)
-    bot.send_message(message.chat.id, "Top 5 oder 5 zufällige", reply_markup = reply_keyboard_category)
-    bot.register_next_step_handler(message, process_category)
+    else:
+        bot.send_message(message.chat.id, "Top 5 oder 5 zufällige", reply_markup = reply_keyboard_category)
+        bot.register_next_step_handler(message, process_category)
 
 #massage handler for the selection of top 5 or genre
 def process_category(message):
@@ -191,55 +195,56 @@ def process_category(message):
     category = message.text
     if category != "Top 5" and category != "5 zufällige":
         process_searchType(message)
-    if searchType == "Film":
-        genres = genres_movie
-    elif searchType == "Serie":
-        genres = genres_series
-    genre_ID = 0
-    if (genre_auswahl != "ALLE"):
-        for genre in genres:
-            if genre["name"] == genre_auswahl:
-                genre_ID = genre["id"]
+    else:
+        if searchType == "Film":
+            genres = genres_movie
+        elif searchType == "Serie":
+            genres = genres_series
+        genre_ID = 0
+        if (genre_auswahl != "ALLE"):
+            for genre in genres:
+                if genre["name"] == genre_auswahl:
+                    genre_ID = genre["id"]
 
-    if category == "5 zufällige":
-        bot.send_message(message.chat.id, "5 zufällige werden gesucht.", reply_markup = reply_keyboard_Remove)
-        
-        #get Top 100 Films
-        results = discover_tmdb(searchType, genre_ID,1)
-        for i in range(2, 6):
-            results = results +discover_tmdb(searchType, genre_ID,i)
-        
-        if results == []:
-            if searchType =="Serie":
-                bot.send_message(message.chat.id, "Keine Serie von dem Genre "+genre_auswahl+" gefunden.", reply_markup = reply_keyboard_Remove)
-            if searchType =="Film":
-                bot.send_message(message.chat.id, "Kein Film von dem Genre "+genre_auswahl+" gefunden.", reply_markup = reply_keyboard_Remove)
-        else:
-            #pick 5 random numbers
-            random_index = set()
-            while len(random_index) < 5:
-                number = random.randint(1, len(results))
-                random_index.add(number)
-                
-            for i in range(0,5):
-                result = results[list(random_index)[i]]
-                items.append(result)
-            send_Results(message.chat.id,items)
+        if category == "5 zufällige":
+            bot.send_message(message.chat.id, "5 zufällige werden gesucht.", reply_markup = reply_keyboard_Remove)
             
-    elif category == "Top 5":
-        bot.send_message(message.chat.id, "Top 5 werden gesucht.", reply_markup = reply_keyboard_Remove)
-        results = discover_tmdb(searchType, genre_ID,1)
-        if results == []:
-            if searchType =="Serie":
-                bot.send_message(message.chat.id, "Keine Serie von dem Genre "+genre_auswahl+" gefunden.", reply_markup = reply_keyboard_Remove)
-            if searchType =="Film":
-                bot.send_message(message.chat.id, "Kein Film von dem Genre "+genre_auswahl+" gefunden.", reply_markup = reply_keyboard_Remove)
-        else:
-            for index,result in enumerate(results):
-                if index >= 5:  # Abbrechen, wenn mehr als 5 Elemente verarbeitet wurden
-                    break
-                items.append(result)
-            send_Results(message.chat.id,items)
+            #get Top 100 Films
+            results = discover_tmdb(searchType, genre_ID,1)
+            for i in range(2, 6):
+                results = results +discover_tmdb(searchType, genre_ID,i)
+            
+            if results == []:
+                if searchType =="Serie":
+                    bot.send_message(message.chat.id, "Keine Serie von dem Genre "+genre_auswahl+" gefunden.", reply_markup = reply_keyboard_Remove)
+                if searchType =="Film":
+                    bot.send_message(message.chat.id, "Kein Film von dem Genre "+genre_auswahl+" gefunden.", reply_markup = reply_keyboard_Remove)
+            else:
+                #pick 5 random numbers
+                random_index = set()
+                while len(random_index) < 5:
+                    number = random.randint(1, len(results))
+                    random_index.add(number)
+                    
+                for i in range(0,5):
+                    result = results[list(random_index)[i]]
+                    items.append(result)
+                send_Results(message.chat.id,items)
+                
+        elif category == "Top 5":
+            bot.send_message(message.chat.id, "Top 5 werden gesucht.", reply_markup = reply_keyboard_Remove)
+            results = discover_tmdb(searchType, genre_ID,1)
+            if results == []:
+                if searchType =="Serie":
+                    bot.send_message(message.chat.id, "Keine Serie von dem Genre "+genre_auswahl+" gefunden.", reply_markup = reply_keyboard_Remove)
+                if searchType =="Film":
+                    bot.send_message(message.chat.id, "Kein Film von dem Genre "+genre_auswahl+" gefunden.", reply_markup = reply_keyboard_Remove)
+            else:
+                for index,result in enumerate(results):
+                    if index >= 5:  # Abbrechen, wenn mehr als 5 Elemente verarbeitet wurden
+                        break
+                    items.append(result)
+                send_Results(message.chat.id,items)
 
 @bot.callback_query_handler(func=lambda call: call.data == "delete")
 def delete_message(call):
