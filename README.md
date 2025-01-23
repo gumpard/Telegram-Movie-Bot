@@ -26,12 +26,6 @@ Außerdem wird die [tmdbsimple](https://github.com/celiao/tmdbsimple) Library ve
 pip install tmdbsimple
 ```
 Diese Library beruht auf [requests](https://requests.readthedocs.io/en/latest/) und wird dabei mit installiert.
-<!--
-PIL?
-io?
-random?
--->
-Andere Librarys --> Tammo?
 
 ## Schritt 2: Telegram Bot einrichten
 Um eine Telegram Bot zu erstellen ist es am Einfachsten, dieser [Anleitung](https://core.telegram.org/bots/tutorial#obtain-your-bot-token) zu folgen.
