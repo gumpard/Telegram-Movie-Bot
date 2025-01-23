@@ -9,7 +9,7 @@
 
 # Telegram Movie-Bot
 
-_Ein Telegram Bot, welcher das Entdecken von neuen Filmen oder Serien vereinfachen soll. Außerdem werden die Bewertungen verschiedener Datenbanken zusammengeführt._
+_Ein Telegram Bot, welcher das Entdecken von neuen Filmen oder Serien vereinfachen soll._
 
 </header>
 
@@ -59,10 +59,38 @@ Für den einfacheren Umgang kann das Programm auch als Service ausgeführt werde
 > [!TIP]
 > Für den [TMDB-Token](https://www.themoviedb.org/settings/api) ist der **API-Schlüssel** zu verwenden, dieser ist der kurzere.
 
-## Schritt 5 _(Optional)_: 
+## Schritt 5 Als Service ausführen _(Optional)_: 
+Zunächst wird eine neue Servicedatei erstellt, wie z.B.:
+```
+sudo nano /etc/systemd/system/Movie_Bot.service
+```
+Die Datei wird dann folgendermaßen gefüllt:
+```
+[Unit]
+Description=telegram bot
+After=network.target
 
---> Service
+[Service]
+WorkingDirectory=/home/*USERNAME*
+ExecStart=/usr/bin/python3 /home/*USERNAME*/Movie_TeleBot.py
+Restart=on-failure
+User=*USERNAME*
 
+[Install]
+WantedBy=multi-user.target
+```
+Anschließend bestätigen und speichern. Nun muss der Service noch gestartet werden, dazu
+sind die folgenden Zeilen notwendig:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable Movie_Bot.service
+sudo systemctl start Movie_Bot.service
+```
+
+> [!NOTE]
+> Das Programm startet automatisch beim Hochfahren des Raspberry Pis
+
+***
 <footer>
 
 _Ein Projekt für die HAW-Hamburg im Kurs Paspberry-PI bei Dr. Claudius Noack_
