@@ -73,6 +73,10 @@ User=*USERNAME*
 [Install]
 WantedBy=multi-user.target
 ```
+
+> [!TIP]
+> Beachte, dass \*USERNAME\* entsprechend ausgefüllt werden muss.
+
 Anschließend bestätigen und speichern. Nun muss der Service noch gestartet werden, dazu
 sind die folgenden Zeilen notwendig:
 ```
@@ -82,7 +86,7 @@ sudo systemctl start Movie_Bot.service
 ```
 
 > [!NOTE]
-> Das Programm startet automatisch beim Hochfahren des Raspberry Pis
+> Das Programm startet automatisch beim Hochfahren des Raspberry Pi's.
 
 ***
 <footer>
