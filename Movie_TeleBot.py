@@ -3,24 +3,26 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from telebot.types import ReplyKeyboardMarkup
 from telebot.types import ReplyKeyboardRemove
 import tmdbsimple as tmdb
-from PIL import Image
-from io import BytesIO
 import requests
 import random
+import time
 
 #create telebot 
 bot = telebot.TeleBot(token = "7648000591:AAGCifCA6IGZNQbgWE3nYcAW6KLhhiLaxPg")
 
-#global variables
-global category, searchType, genre_auswahl, func
-items = []
+#tmdb TEY
+tmdb.API_KEY = "b0c4a4e00c846e0322bbfea2f054f5a9"
 
+#global variables
+global category, searchType, genre_auswahl, func, message_deleted
+items = []
+message_deleted = -1
+
+#available genres for movies and series
 genres_movie = [{"id":28,"name":"Action"},{"id":12,"name":"Adventure"},{"id":16,"name":"Animation"},{"id":35,"name":"Comedy"},{"id":80,"name":"Crime"},{"id":99,"name":"Documentary"},{"id":18,"name":"Drama"},{"id":10751,"name":"Family"},{"id":14,"name":"Fantasy"},{"id":36,"name":"History"},{"id":27,"name":"Horror"},{"id":10402,"name":"Music"},{"id":9648,"name":"Mystery"},{"id":10749,"name":"Romance"},{"id":878,"name":"Science Fiction"},{"id":10770,"name":"TV Movie"},{"id":53,"name":"Thriller"},{"id":10752,"name":"War"},{"id":37,"name":"Western"}]
 genres_series =[{"id":10759,"name":"Action & Adventure"},{"id":16,"name":"Animation"},{"id":35,"name":"Comedy"},{"id":80,"name":"Crime"},{"id":99,"name":"Documentary"},{"id":18,"name":"Drama"},{"id":10751,"name":"Family"},{"id":10762,"name":"Kids"},{"id":9648,"name":"Mystery"},{"id":10763,"name":"News"},{"id":10764,"name":"Reality"},{"id":10765,"name":"Sci-Fi & Fantasy"},{"id":10766,"name":"Soap"},{"id":10767,"name":"Talk"},{"id":10768,"name":"War & Politics"},{"id":37,"name":"Western"}]
 
-# TMDb-Funktionen ================================================================================================
-tmdb.API_KEY = "b0c4a4e00c846e0322bbfea2f054f5a9"
-
+#get Films and Series
 def discover_tmdb(media_type, genre,pages):
     discover = tmdb.Discover()
     params = {
@@ -43,6 +45,7 @@ def discover_tmdb(media_type, genre,pages):
 
     return response.get("results", [])
 
+#get details about movies and series
 def get_details(media_type, media_id):
     if media_type == "Film":
         movie = tmdb.Movies(media_id)
@@ -51,8 +54,6 @@ def get_details(media_type, media_id):
     elif media_type == "Serie":
         tv = tmdb.TV(media_id)
         details = tv.info(language="de-DE")
-        #print(tv.watch_providers())
-        #providers = tv.watch_providers().get("results", {}).get("DE", {}).get("flatrate", [])
         providers = []
     else:
         details = {}
@@ -61,16 +62,12 @@ def get_details(media_type, media_id):
     details["providers"] = providers
     return details
 
-# TMDb-Funktionen ================================================================================================
-
 # send results
 def send_Results(chat_id, results):
     for index, result in enumerate(results):
         
         # create message
         title = result.get("title") or result.get("name", "Unbekannt")
-        vote_average = result.get("vote_average", "Keine Bewertung")
-        vote_count = result.get("vote_count", 0)
         button_info = InlineKeyboardButton(text = title, callback_data ="info"+str(index))
         button_description = InlineKeyboardButton(text = "Beschreibung", callback_data ="desc"+str(index))
         inline_keyboard = InlineKeyboardMarkup(row_width=2)
@@ -84,7 +81,7 @@ def send_Results(chat_id, results):
             bot.send_photo(chat_id, image_url, reply_markup = inline_keyboard)
         elif poster_path == None:
             bot.send_message(chat_id,"Kein Bild vorhanden.", reply_markup = inline_keyboard)
-            
+
 #create Buttons for the genre selection
 reply_keyboard_genres_movie = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
 reply_keyboard_genres_movie.add("ALLE")
@@ -96,7 +93,7 @@ reply_keyboard_genres_series.add("ALLE")
 for index, genre in enumerate(genres_series):
     reply_keyboard_genres_series.add(genre["name"])
 
-#create Keyboard for movie and Sereis
+#create Keyboard for statup
 reply_keyboard_func = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
 reply_keyboard_func.add("Empfehlung","Suche")
 
@@ -122,6 +119,7 @@ def process_func(message):
     bot.send_message(message.chat.id, "Empfehlung oder Suche", reply_markup = reply_keyboard_func)
     bot.register_next_step_handler(message, process_type)
 
+#massage handler for the function
 def process_type(message):
     global func
     func = message.text
@@ -132,7 +130,7 @@ def process_type(message):
         bot.send_message(message.chat.id, "Film oder Serie?", reply_markup = reply_keyboard_type)
         bot.register_next_step_handler(message, process_genre)
     
-#massage handler for genres
+#massage handler for the search type / media type
 def process_genre(message):
     global searchType
     searchType = message.text
@@ -150,6 +148,7 @@ def process_genre(message):
             bot.send_message(message.chat.id, "Geben Sie ein Suchbegriff ein.", reply_markup = reply_keyboard_Remove)
             bot.register_next_step_handler(message, process_Suche)
 
+#massage handler for the search of movies and series
 def process_Suche(message):
     global searchType
     items.clear()
@@ -158,16 +157,20 @@ def process_Suche(message):
         results = search.movie(query=message.text, language="de-DE").get("results", [])
     elif searchType == "Serie":
         results = search.tv(query=message.text, language="de-DE").get("results", [])
-    else:
-        results = []
         
     if results != []:
         for result in results[:10]:
             items.append(result)
         send_Results(message.chat.id,items)
-        
+    else:
+        if searchType == "Film":
+            bot.send_message(message.chat.id, "Kein Film gefunden.", reply_markup = reply_keyboard_Remove)
+        elif searchType == "Serie":
+            bot.send_message(message.chat.id, "Keine Serie gefunden.", reply_markup = reply_keyboard_Remove)
+        bot.send_message(message.chat.id, "Geben Sie ein Suchbegriff ein.", reply_markup = reply_keyboard_Remove)
+        bot.register_next_step_handler(message, process_Suche)
 
-#massage handler for the selection of movie oder Series
+#massage handler for the selection genre
 def process_searchType(message):
     global genre_auswahl,  searchType
     if searchType == "Film":
@@ -246,11 +249,13 @@ def process_category(message):
                     items.append(result)
                 send_Results(message.chat.id,items)
 
+#callback handler for the delete button
 @bot.callback_query_handler(func=lambda call: call.data == "delete")
 def delete_message(call):
     # Lösche die Nachricht
     bot.delete_message(call.message.chat.id, call.message.message_id)
-
+    time.sleep(1)
+    
 #callback handler for the detailed information
 @bot.callback_query_handler(func=lambda call:True)
 def check_button(call):
@@ -265,9 +270,11 @@ def check_button(call):
             providers = details.get("providers", [])
             runtime = details.get("runtime", "")
             genres_details = details.get("genres", [])
-            genre_string=genres_details[0]["name"]
-            for genre_detail in genres_details[1:]:
-                genre_string =genre_string+ ", "+genre_detail["name"]
+            genre_string = ""
+            if genres_details != []:
+                genre_string=genres_details[0]["name"]
+                for genre_detail in genres_details[1:]:
+                    genre_string =genre_string+ ", "+genre_detail["name"]
             release_date = details.get("release_date", "")[:4]
             provider_names = ", ".join([provider.get("provider_name", "Unbekannt") for provider in providers]) or "Keine Anbieter verfügbar"
             message = title+"\nLänge: "+str(runtime)+"min\n"+release_date+"\nGenre: "+genre_string+"\n"+str(round(vote_average,1))+ "/10 ("+str(vote_count)+" Bewertungen)"+"\n"+provider_names
@@ -276,20 +283,25 @@ def check_button(call):
             number_of_episodes = details.get("number_of_episodes", "")
             number_of_seasons = details.get("number_of_seasons", "")
             genres_details = details.get("genres", [])
-            genre_string=genres_details[0]["name"]
-            for genre_detail in genres_details[1:]:
-                genre_string =genre_string+ ", "+genre_detail["name"]
+            genre_string = ""
+            if genres_details != []:
+                genre_string=genres_details[0]["name"]
+                for genre_detail in genres_details[1:]:
+                    genre_string =genre_string+ ", "+genre_detail["name"]
             first_air_date = details.get("first_air_date", "")[:4]
             provider_names = ", ".join([provider.get("provider_name", "Unbekannt") for provider in providers]) or "Keine Anbieter verfügbar"
-            message = title+"\nseit: "+first_air_date+"\nGenre: "+genre_string+"\nStaffeln: "+str(number_of_seasons)+" Episoden: "+str(number_of_episodes)+"\n"+str(round(vote_average,1))+ "/10 ("+str(vote_count)+" Bewertungen)"+"\n"+provider_names
+            message = title+"\nseit: "+first_air_date+"\nGenre: "+genre_string+"\nStaffeln: "+str(number_of_seasons)+", Episoden: "+str(number_of_episodes)+"\n"+str(round(vote_average,1))+ "/10 ("+str(vote_count)+" Bewertungen)"+"\n"+provider_names
+        if len(message) > 200:
+            message = message[:197]+"..."
         bot.answer_callback_query(call.id, message,show_alert=True)
     elif call.data[:4] == "desc":
         index = int(call.data[4:])
         details = get_details(searchType, items[index].get("id"))
-        description = details.get("overview", "Keine Beschreibung verfügbar.")
+        description = details.get("overview")
+        if description =="":
+            description = "Keine Beschreibung vorhanden."
         title = items[index].get("title") or items[index].get("name", "Unbekannt")
-        bot.send_message(call.message.chat.id,title+"\n"+description , reply_markup = inline_keyboard_delete)
+        bot.send_message(call.message.chat.id,title+":\n"+description , reply_markup = inline_keyboard_delete)
 
-
-#loop for the massage handlers
+#loop for the telegram bot
 bot.polling()
